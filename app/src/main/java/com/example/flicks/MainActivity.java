@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
                         Movie movie = new Movie(results.getJSONObject(i));
                         movies.add(movie);
                     }
-                    Log.i(TAG, "Loaded %s movies");
+                    Log.i(TAG, String.format("Loaded %s movies", results.length()));
                 } catch (JSONException e) {
                     logError("Failed to parse now playing ", e, true);
                 }
@@ -99,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                     JSONArray posterSizeOptions = response.getJSONArray("poster_size");
                     // use the option at index 3 or w342 as a fallback
                     posterSize = posterSizeOptions.optString(3, "w342");
+
                 } catch (JSONException e) {
                     logError("Failed parsing configuration", e, true);
                 }
