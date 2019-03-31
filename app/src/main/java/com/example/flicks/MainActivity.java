@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.flicks.models.Movie;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -12,6 +13,8 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -22,8 +25,6 @@ public class MainActivity extends AppCompatActivity {
     public final static String API_BASE_URL = "https//api.themoviedb.org/3";
     // the parameter name for the API key
     public final static String API_KEY_PARAM = "api_key";
-    // the API key - TODO move to a secure location
-    public final static String API_KEY = "a07e22bc18f5cb106bfe4cc1f83ad8ed";
     // tag for login from this activity
     public final static String TAG = "MovieListActivity";
 
@@ -33,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
     String imageBaseUrl;
     // the poster size to use when fetching image, part of the url
     String posterSize;
+    // the list of currently playing movies
+    ArrayList<Movie> movies;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +43,42 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // initialize the client
         client = new AsyncHttpClient();
+        // initialize the list of movies
+        movies =new ArrayList<>();
         // get the configuration on app creation
         getConfiguration();
+    }
+
+    // get the list of currently playing movies from the API
+    private void getNOwPlaying() {
+        // create the url
+        String url = API_BASE_URL + "/movie/now_playing";
+        // set the request parameters
+        RequestParams params = new RequestParams();
+        params.put(API_KEY_PARAM, getString(R.string.api_key)); // API key, always required
+        // execute a GET request expecting a JSON object response
+        client.get(url, params, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                // load the results into movie list
+                try {
+                    JSONArray results = response.getJSONArray("results");
+                    // iterate through result set and create Movie objects
+                    for (int i = 0; i < results.length(); i++) {
+                        Movie movie = new Movie(results.getJSONObject(i));
+                        movies.add(movie);
+                    }
+                    Log.i(TAG, "Loaded %s movies");
+                } catch (JSONException e) {
+                    logError("Failed to parse now playing ", e, true);
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                logError("Failed to get date from playing now endpoint", throwable, true);
+            }
+        });
     }
 
     // get the configuration from the API
@@ -50,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         String url = API_BASE_URL + "/configuration";
         // set the request parameters
         RequestParams params = new RequestParams();
-        params.put(API_KEY_PARAM, API_KEY); // API key, always required
+        params.put(API_KEY_PARAM, getString(R.string.api_key)); // API key, always required
         // execute a GET request expecting a JSON object response
         client.get(url, params, new JsonHttpResponseHandler() {
             @Override
