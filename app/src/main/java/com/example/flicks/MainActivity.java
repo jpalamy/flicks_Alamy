@@ -99,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
                     JSONArray posterSizeOptions = response.getJSONArray("poster_size");
                     // use the option at index 3 or w342 as a fallback
                     posterSize = posterSizeOptions.optString(3, "w342");
-
+                    // get the now playing movie list
+                    getNOwPlaying();
                 } catch (JSONException e) {
                     logError("Failed parsing configuration", e, true);
                 }
