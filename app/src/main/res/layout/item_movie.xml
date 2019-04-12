@@ -5,11 +5,10 @@
     android:layout_width="match_parent" android:layout_height="match_parent">
 
     <ImageView
-        android:id="@+id/imageView4"
+        android:id="@+id/ivPosterImage"
         android:layout_width="90dp"
         android:layout_height="135dp"
-        app:srcCompat="@android:drawable/screen_background_dark"
-        />
+        app:srcCompat="@android:drawable/screen_background_dark" />
 
     <TextView
         android:id="@+id/tVTitle"
