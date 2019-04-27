@@ -2,6 +2,8 @@ package com.example.flicks;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -36,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
     String posterSize;
     // the list of currently playing movies
     ArrayList<Movie> movies;
+    //the recycler view
+    RecyclerView rvMovies;
+    // the adapter wired to the recycler view
+    MovieAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +51,20 @@ public class MainActivity extends AppCompatActivity {
         client = new AsyncHttpClient();
         // initialize the list of movies
         movies =new ArrayList<>();
+        // initialize the adapter  -- movies array connot be reinitialized after this point
+        adapter = new MovieAdapter(movies);
+
+        // resolve the recycle view and connect a layout manager and the adapter
+        rvMovies = (RecyclerView)findViewById(R.id.rVMovies);
+        rvMovies.setLayoutManager(new LinearLayoutManager(this));
+        rvMovies.setAdapter(adapter);
+
         // get the configuration on app creation
         getConfiguration();
     }
 
     // get the list of currently playing movies from the API
-    private void getNOwPlaying() {
+    private void getNowPlaying() {
         // create the url
         String url = API_BASE_URL + "/movie/now_playing";
         // set the request parameters
@@ -67,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
                     for (int i = 0; i < results.length(); i++) {
                         Movie movie = new Movie(results.getJSONObject(i));
                         movies.add(movie);
+                        // notify adapter that a row was added
+                        adapter.notifyItemInserted(movies.size()- 1);
                     }
                     Log.i(TAG, String.format("Loaded %s movies", results.length()));
                 } catch (JSONException e) {
@@ -94,13 +110,13 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
                     // get the image base url
-                    imageBaseUrl = response.getString("secure_base_ur");
+                    imageBaseUrl = response.getString("secure_base_url");
                     // get the poster size
                     JSONArray posterSizeOptions = response.getJSONArray("poster_size");
                     // use the option at index 3 or w342 as a fallback
                     posterSize = posterSizeOptions.optString(3, "w342");
                     // get the now playing movie list
-                    getNOwPlaying();
+                    getNowPlaying();
                 } catch (JSONException e) {
                     logError("Failed parsing configuration", e, true);
                 }
