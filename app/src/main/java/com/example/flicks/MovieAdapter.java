@@ -27,21 +27,33 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
     // creates and inflates a new view
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // get the context and create the inflater
-        return null;
+        Context context = parent.getContext();
+        LayoutInflater inflater = LayoutInflater.from(context);
+        // create the view using the item_movie layout
+        View movieView = inflater.inflate(R.layout.item_movie, parent, false);
+        // return a new view Holder
+        return new ViewHolder(movieView);
     }
 
     // blinds and inflated view to a new item
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int i) {
+    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
+        // get the movie data at the specified position
+        Movie movie = movies.get(position);
+        // populate the view with the movie data
+        viewHolder.tVTitle.setText(movie.getTitle());
+        viewHolder.tvOverview.setText(movie.getOverview());
+
+        // TODO - set image using Glide
 
     }
 
     // returns the total number of items in the list
     @Override
     public int getItemCount() {
-        return 0;
+        return movies.size();
     }
 
     // create the viewHolder as a static inner class
