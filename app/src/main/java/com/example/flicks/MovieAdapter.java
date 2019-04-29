@@ -1,6 +1,7 @@
 package com.example.flicks;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -9,14 +10,19 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.flicks.models.Config;
 import com.example.flicks.models.Movie;
 
 import java.util.ArrayList;
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
+public class MovieAdapter<RoundedCornersTransformation> extends RecyclerView.Adapter<MovieAdapter.ViewHolder> {
 
     // list of Movie
     ArrayList<Movie> movies;
+    // config needed for image urls
+    Config config;
+    // context for rendering
+    Context context;
 
 
     // initialize with list
@@ -24,12 +30,20 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         this.movies = movies;
     }
 
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
+    }
+
     // creates and inflates a new view
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // get the context and create the inflater
-        Context context = parent.getContext();
+        context = parent.getContext();
         LayoutInflater inflater = LayoutInflater.from(context);
         // create the view using the item_movie layout
         View movieView = inflater.inflate(R.layout.item_movie, parent, false);
@@ -46,7 +60,31 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         viewHolder.tVTitle.setText(movie.getTitle());
         viewHolder.tvOverview.setText(movie.getOverview());
 
-        // TODO - set image using Glide
+        // determine the current orientation
+        boolean isPortrait = context.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT;
+
+        // build url for poster image
+        String imageUrl = null;
+
+        // if in portrait mode, load the poster image
+        if (isPortrait) {
+            imageUrl = config.getImageUrl(config.getPosterSize(), movie.getPosterPath());
+        } else {
+            // load the backdrop image
+            imageUrl = config.getImageUrl(config.getBackdropSize(), movie.getBackdropPath());
+        }
+
+        // get the correct placeholder and imageview for the current orientation
+        int placeholderId = isPortrait ? R.drawable.flicks_backdrop_placeholder2 : R.drawable.flicks_backdrop_placeholder2;
+        ImageView imageView = isPortrait ? viewHolder.ivPosterImage : viewHolder.ivBackdropImage;
+
+        // load image using glide
+       /* Glide.with(context)
+                .load(imageUrl)
+                .bitmapTransform(new RoundedCornersTransformation(context, 25, 0))
+                .placeholder(placeholderId)
+                .error(placeholderId)
+                .into(imageView);*/
 
     }
 
@@ -61,6 +99,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
 
         // track view objects
         ImageView ivPosterImage;
+        ImageView ivBackdropImage;
         TextView tVTitle;
         TextView tvOverview;
 
@@ -68,6 +107,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
             super(itemView);
             // lookup view objets by id
             ivPosterImage = itemView.findViewById(R.id.ivPosterImage);
+            ivBackdropImage = (ImageView) itemView.findViewById(R.id.ivBackropImage);
             tvOverview = (TextView) itemView.findViewById(R.id.tVOverview);
             tVTitle = (TextView) itemView.findViewById(R.id.tVTitle);
 

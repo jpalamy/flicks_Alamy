@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Config;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,24 +25,22 @@ public class MainActivity extends AppCompatActivity {
 
     // constants
     // the base URL for the API
-    public final static String API_BASE_URL = "https//api.themoviedb.org/3";
+    public final static String API_BASE_URL = "https://api.themoviedb.org/3";
     // the parameter name for the API key
     public final static String API_KEY_PARAM = "api_key";
     // tag for login from this activity
-    public final static String TAG = "MovieListActivity";
+    public final static String TAG = "MainActivity";
 
     // instance fields
     AsyncHttpClient client;
-    // the base url for loading images
-    String imageBaseUrl;
-    // the poster size to use when fetching image, part of the url
-    String posterSize;
     // the list of currently playing movies
     ArrayList<Movie> movies;
     //the recycler view
     RecyclerView rvMovies;
     // the adapter wired to the recycler view
     MovieAdapter adapter;
+    //image config
+    com.example.flicks.models.Config config;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
         movies =new ArrayList<>();
         // initialize the adapter  -- movies array connot be reinitialized after this point
         adapter = new MovieAdapter(movies);
+        // image config
+        Config config;
 
         // resolve the recycle view and connect a layout manager and the adapter
         rvMovies = (RecyclerView)findViewById(R.id.rVMovies);
@@ -109,12 +110,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 try {
-                    // get the image base url
-                    imageBaseUrl = response.getString("secure_base_url");
-                    // get the poster size
-                    JSONArray posterSizeOptions = response.getJSONArray("poster_size");
-                    // use the option at index 3 or w342 as a fallback
-                    posterSize = posterSizeOptions.optString(3, "w342");
+                    config = new com.example.flicks.models.Config(response);
+                    Log.i(TAG,
+                            String.format("Loaded configuration with imageBaseUrl %s and posterSize %s",
+                                   config.getImageBaseUrl(),
+                                    config.getPosterSize()));
+
+                    // pass config to adapter
+                    adapter.setConfig(config);
                     // get the now playing movie list
                     getNowPlaying();
                 } catch (JSONException e) {
