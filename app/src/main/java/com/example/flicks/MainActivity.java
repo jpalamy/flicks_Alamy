@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         Config config;
 
         // resolve the recycle view and connect a layout manager and the adapter
-        rvMovies = (RecyclerView)findViewById(R.id.rVMovies);
+        rvMovies = (RecyclerView)findViewById(R.id.rvMovies);
         rvMovies.setLayoutManager(new LinearLayoutManager(this));
         rvMovies.setAdapter(adapter);
 
